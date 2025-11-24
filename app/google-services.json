@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "137077367290",
+    "firebase_url": "https://appvenenoso-default-rtdb.firebaseio.com",
+    "project_id": "appvenenoso",
+    "storage_bucket": "appvenenoso.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137077367290:android:27d039fed0e9ea463c8443",
+        "android_client_info": {
+          "package_name": "com.example.appbasz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuAIZQSWddy3tiN0yTFyQxerH9_RIHtIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137077367290:android:831e1077aa4f05563c8443",
+        "android_client_info": {
+          "package_name": "com.example.appruau"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuAIZQSWddy3tiN0yTFyQxerH9_RIHtIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137077367290:android:d332da7f1126ac703c8443",
+        "android_client_info": {
+          "package_name": "com.example.appvenenoso"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuAIZQSWddy3tiN0yTFyQxerH9_RIHtIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
