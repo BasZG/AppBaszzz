@@ -16,7 +16,8 @@ fun BottomNavigationBar(
     onHomeClick: () -> Unit,
     onCartClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onSettingsClick: () -> Unit  // Nuevo parámetro añadido
 ) {
     NavigationBar(
         modifier = Modifier.fillMaxWidth(),
@@ -35,7 +36,7 @@ fun BottomNavigationBar(
         NavigationBarItem(
             icon = {
                 Text(
-                    "Carrito",
+                    "Cart",
                     fontWeight = if (currentScreen == "cart") FontWeight.Bold else FontWeight.Normal
                 )
             },
@@ -46,7 +47,7 @@ fun BottomNavigationBar(
             NavigationBarItem(
                 icon = {
                     Text(
-                        "Perfil",
+                        "Profile",
                         fontWeight = if (currentScreen == "profile") FontWeight.Bold else FontWeight.Normal
                     )
                 },
@@ -65,5 +66,15 @@ fun BottomNavigationBar(
                 onClick = onLoginClick
             )
         }
+        NavigationBarItem(
+            icon = {
+                Text(
+                    "Settings",
+                    fontWeight = if (currentScreen == "settings") FontWeight.Bold else FontWeight.Normal
+                )
+            },
+            selected = currentScreen == "settings",
+            onClick = onSettingsClick
+        )
     }
 }

@@ -1,18 +1,21 @@
 package com.example.appbasz.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appbasz.ViewModel.SettingsViewModel
 import com.example.appbasz.ui.screens.CartScreen
+import com.example.appbasz.ui.screens.FavoritesScreen
 import com.example.appbasz.ui.screens.HomeScreen
 import com.example.appbasz.ui.screens.LoginScreen
 import com.example.appbasz.ui.screens.ProductDetailScreen
 import com.example.appbasz.ui.screens.ProfileScreen
 import com.example.appbasz.ui.screens.RegisterScreen
+import com.example.appbasz.ui.screens.SettingsScreen
 import com.example.appbasz.viewmodel.AuthViewModel
 
 sealed class Screen(val route: String) {
@@ -20,12 +23,15 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
     object Cart : Screen("cart")
+    object Favorites : Screen("favorites")
+
     object Profile : Screen("profile")
+    object Settings : Screen("settings")
     object ProductDetail : Screen("product_detail")
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
 
@@ -46,6 +52,9 @@ fun AppNavigation() {
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
                 }
             )
         }
@@ -85,9 +94,49 @@ fun AppNavigation() {
                 onBackClick = { navController.popBackStack() }
             )
         }
-
+        composable(Screen.Favorites.route) {
+            FavoritesScreen(
+                onBackClick = { navController.popBackStack() },
+                onProductClick = { productId ->
+                    navController.navigate("${Screen.ProductDetail.route}/$productId")
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route)
+                }
+            )
+        }
+        composable(Screen.Favorites.route) {
+            FavoritesScreen(
+                onBackClick = { navController.popBackStack() },
+                onProductClick = { productId ->
+                    navController.navigate("${Screen.ProductDetail.route}/$productId")
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route)
+                }
+            )
+        }
         composable(Screen.Profile.route) {
             ProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route)
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route)
+                },
+                onNavigateToFavorites = { // NUEVO CALLBACK
+                    navController.navigate(Screen.Favorites.route)
+                }
+            )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                settingsViewModel = settingsViewModel,
                 onBackClick = { navController.popBackStack() }
             )
         }

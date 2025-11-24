@@ -1,5 +1,10 @@
 package com.example.appbasz.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,37 +20,145 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appbasz.ViewModel.ProfileViewModel
+import com.example.appbasz.ViewModel.ProfileViewModelFactory
+import com.example.appbasz.data.local.PreferencesManager
+import com.example.appbasz.ui.components.ImageSourceDialog
+import com.example.appbasz.ui.components.ProfileImage
+import com.example.appbasz.utils.createImageFile
 import com.example.appbasz.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onBackClick: () -> Unit = {},
-    onNavigateToLogin: () -> Unit = {}, // Nuevo parámetro
-    onNavigateToRegister: () -> Unit = {} // Nuevo parámetro
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {}
 ) {
     val authViewModel: AuthViewModel = viewModel()
     val currentUser by authViewModel.currentUser.collectAsState()
     val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+
+    // Context y ViewModel para foto de perfil
+    val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val profileViewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(preferencesManager)
+    )
+    val profileImageUri by profileViewModel.profileImageUri.collectAsState()
+
+    // Estados para manejar la selección de imagen
+    var showImageSourceDialog by remember { mutableStateOf(false) }
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // CORRECCIÓN: Declarar cameraLauncher PRIMERO
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            tempCameraUri?.let { uri ->
+                profileViewModel.setProfileImage(uri)
+            }
+        }
+        tempCameraUri = null
+    }
+
+    // Luego declarar permissionLauncher que usa cameraLauncher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted && tempCameraUri != null) {
+            // Si los permisos fueron concedidos, lanzar la cámara
+            tempCameraUri?.let { uri ->
+                cameraLauncher.launch(uri)
+            }
+        } else {
+            // Si los permisos fueron denegados, resetear
+            tempCameraUri = null
+            // Aquí podrías mostrar un mensaje al usuario
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { profileViewModel.setProfileImage(it) }
+    }
+
+    // Función para verificar y solicitar permisos
+    fun checkPermissionsAndOpenCamera() {
+        val permissions = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+
+        val hasPermissions = permissions.all { permission ->
+            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+        }
+
+        if (hasPermissions) {
+            // Ya tiene permisos - abrir cámara directamente
+            try {
+                val file = createImageFile(context)
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    file
+                )
+                tempCameraUri = uri
+                cameraLauncher.launch(uri)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Manejar error
+            }
+        } else {
+            // Solicitar permisos primero
+            try {
+                val file = createImageFile(context)
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    file
+                )
+                tempCameraUri = uri
+                permissionLauncher.launch(permissions)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Manejar error
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -76,32 +189,32 @@ fun ProfileScreen(
                 ) {
                     Column(
                         modifier = Modifier.padding(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Avatar/Icono de usuario
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "Usuario",
-                                modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
+                        // Avatar con selector de imagen
+                        ProfileImage(
+                            imageUri = profileImageUri,
+                            onImageClick = {
+                                showImageSourceDialog = true
+                            },
+                            modifier = Modifier.size(120.dp)
+                        )
 
-                            Column {
-                                Text(
-                                    text = currentUser?.displayName ?: "Usuario",
-                                    style = MaterialTheme.typography.headlineMedium
-                                )
-                                Text(
-                                    text = currentUser?.email ?: "",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = currentUser?.displayName ?: "Usuario",
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            Text(
+                                text = currentUser?.email ?: "",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -163,6 +276,40 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
+                        // BOTÓN DE FAVORITOS
+                        OutlinedButton(
+                            onClick = onNavigateToFavorites,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Icon(
+                                Icons.Default.Favorite,
+                                contentDescription = "Favoritos",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Mis Favoritos")
+                        }
+
+                        // Botón Configuración
+                        OutlinedButton(
+                            onClick = onNavigateToSettings,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = "Configuración",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Configuración")
+                        }
+
                         // Botón Cerrar Sesión
                         Button(
                             onClick = {
@@ -192,7 +339,7 @@ fun ProfileScreen(
                 ) {
                     Column(
                         modifier = Modifier.padding(32.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
@@ -230,9 +377,38 @@ fun ProfileScreen(
                         ) {
                             Text("Registrarse")
                         }
+
+                        // Botón Configuración (para usuarios no logueados también)
+                        OutlinedButton(
+                            onClick = onNavigateToSettings,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = "Configuración",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Configuración")
+                        }
                     }
                 }
             }
+        }
+
+        // Diálogo para seleccionar fuente de imagen
+        if (showImageSourceDialog) {
+            ImageSourceDialog(
+                onDismiss = { showImageSourceDialog = false },
+                onCameraSelected = {
+                    showImageSourceDialog = false
+                    checkPermissionsAndOpenCamera()
+                },
+                onGallerySelected = {
+                    showImageSourceDialog = false
+                    galleryLauncher.launch("image/*")
+                }
+            )
         }
     }
 }
