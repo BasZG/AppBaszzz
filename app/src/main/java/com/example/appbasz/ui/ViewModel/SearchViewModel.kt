@@ -59,7 +59,6 @@ class SearchViewModel(
         }
     }
 
-    // Función para filtrar productos
     fun filterProducts(products: List<ProductModel>, query: String): List<ProductModel> {
         return if (query.isBlank()) {
             products

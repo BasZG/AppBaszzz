@@ -48,7 +48,7 @@ class AuthRepository {
             val firebaseUser = authResult.user
 
             if (firebaseUser != null) {
-                // Actualizar perfil con display name
+                // Actualizar perfil
                 val profileUpdates = UserProfileChangeRequest.Builder()
                     .setDisplayName(displayName)
                     .build()

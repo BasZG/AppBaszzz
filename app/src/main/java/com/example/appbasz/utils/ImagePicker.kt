@@ -1,4 +1,3 @@
-// utils/ImagePickerUtils.kt
 package com.example.appbasz.utils
 
 import android.net.Uri

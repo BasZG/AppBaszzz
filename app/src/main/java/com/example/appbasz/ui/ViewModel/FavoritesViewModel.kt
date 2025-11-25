@@ -58,7 +58,6 @@ class FavoritesViewModel(
         }
     }
 
-    // Esta función es crucial para mostrar los favoritos en FavoritesScreen
     fun loadFavoritesWithProducts(allProducts: List<ProductModel>) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -80,7 +79,6 @@ class FavoritesViewModel(
         return _favoriteIds.value.contains(productId.toString())
     }
 
-    // Mantenemos esta función por compatibilidad, pero ahora usa PreferencesManager
     fun loadFavorites(userId: String, allProducts: List<ProductModel>? = null) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -100,7 +98,6 @@ class FavoritesViewModel(
         }
     }
 
-    // Función de compatibilidad para el toggle antiguo
     fun toggleFavorite(userId: String, product: ProductModel, isCurrentlyFavorite: Boolean) {
         toggleFavorite(product)
     }

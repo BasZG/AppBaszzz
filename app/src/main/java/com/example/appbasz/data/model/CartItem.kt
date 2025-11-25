@@ -11,7 +11,7 @@ data class CartItem(
     val price: Double = 0.0,
     val imageUrl: String = "",
     val quantity: Int = 1,
-    val userId: String = "" // Para vincular al usuario
+    val userId: String = ""
 ) : Parcelable {
 
     fun totalPrice(): Double {

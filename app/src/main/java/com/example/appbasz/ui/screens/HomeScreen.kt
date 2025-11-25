@@ -47,32 +47,25 @@ fun HomeScreen(
 
     val cartViewModel: CartViewModel = viewModel()
 
-    // OBTENER EL CONTEXTO PARA PREFERENCES MANAGER
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
 
-    // VIEWMODEL DE FAVORITOS
     val favoritesViewModel: FavoritesViewModel = viewModel(
         factory = FavoritesViewModelFactory(preferencesManager)
     )
 
-    // NUEVO: VIEWMODEL DE BÚSQUEDA
     val searchViewModel: SearchViewModel = viewModel(
         factory = SearchViewModelFactory(preferencesManager)
     )
 
-    // Estados de búsqueda
     val searchQuery by searchViewModel.searchQuery.collectAsState()
     val searchHistory by searchViewModel.searchHistory.collectAsState()
     val isSearchActive by searchViewModel.isSearchActive.collectAsState()
 
-    // Estado para los IDs de favoritos
     val favoriteIds by favoritesViewModel.favoriteIds.collectAsState()
 
-    // Filtrar productos basado en la búsqueda
     val filteredProducts = searchViewModel.filterProducts(products, searchQuery)
 
-    // Función para verificar si un producto es favorito
     val isProductFavorite: (Int) -> Boolean = { productId ->
         favoriteIds.contains(productId.toString())
     }

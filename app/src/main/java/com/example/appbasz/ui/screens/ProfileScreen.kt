@@ -54,7 +54,8 @@ fun ProfileScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {}
+    onNavigateToFavorites: () -> Unit = {},
+    onNavigateToOrders: () -> Unit = {}
 ) {
     val authViewModel: AuthViewModel = viewModel()
     val currentUser by authViewModel.currentUser.collectAsState()
@@ -203,7 +204,22 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Mis Favoritos")
                         }
-
+                        OutlinedButton(
+                            onClick = onNavigateToOrders,                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Icon(
+                                // Necesitarías un icono de órdenes
+                                Icons.Default.Favorite, // Cambiar por icono de órdenes
+                                contentDescription = "Mis Órdenes",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Mis Órdenes")
+                        }
+                        //Boton de ordenes
                         OutlinedButton(
                             onClick = onNavigateToSettings,
                             modifier = Modifier

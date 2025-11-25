@@ -12,6 +12,8 @@ import com.example.appbasz.ui.screens.CartScreen
 import com.example.appbasz.ui.screens.FavoritesScreen
 import com.example.appbasz.ui.screens.HomeScreen
 import com.example.appbasz.ui.screens.LoginScreen
+import com.example.appbasz.ui.screens.OrderDetailScreen
+import com.example.appbasz.ui.screens.OrderScreen
 import com.example.appbasz.ui.screens.ProductDetailScreen
 import com.example.appbasz.ui.screens.ProfileScreen
 import com.example.appbasz.ui.screens.RegisterScreen
@@ -28,6 +30,8 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object Settings : Screen("settings")
     object ProductDetail : Screen("product_detail")
+    object Order : Screen("order")
+    object OrderDetail : Screen("order_detail")
 }
 
 @Composable
@@ -128,8 +132,11 @@ fun AppNavigation(settingsViewModel: SettingsViewModel) {
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register.route)
                 },
-                onNavigateToFavorites = { // NUEVO CALLBACK
+                onNavigateToFavorites = {
                     navController.navigate(Screen.Favorites.route)
+                },
+                onNavigateToOrders = {
+                    navController.navigate(Screen.Order.route)
                 }
             )
         }
@@ -154,6 +161,27 @@ fun AppNavigation(settingsViewModel: SettingsViewModel) {
                 onAddToCart = { product ->
                     println("Producto añadido al carrito: ${product.name}")
                 }
+            )
+        }
+        composable(Screen.Order.route) {
+            OrderScreen(
+                onOrderClick = { orderId ->
+                    navController.navigate("${Screen.OrderDetail.route}/$orderId")
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "${Screen.OrderDetail.route}/{orderId}",
+            arguments = listOf(
+                navArgument("orderId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+            OrderDetailScreen(
+                orderId = orderId,
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

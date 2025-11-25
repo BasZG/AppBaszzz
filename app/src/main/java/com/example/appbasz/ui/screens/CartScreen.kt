@@ -43,6 +43,7 @@ import coil.compose.AsyncImage
 import com.example.appbasz.viewmodel.AuthViewModel
 import com.example.appbasz.viewmodel.CartViewModel
 import androidx.compose.foundation.layout.width
+import com.example.appbasz.viewmodel.OrderViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +57,8 @@ fun CartScreen(
     val cartViewModel: CartViewModel = viewModel()
     val cartItems by cartViewModel.cartItems.collectAsState()
     val isLoading by cartViewModel.isLoading.collectAsState()
+
+    val orderViewModel: OrderViewModel = viewModel()
 
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
@@ -190,7 +193,20 @@ fun CartScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Button(
                                     onClick = {
-                                        println("Procesando compra...")
+                                        if (currentUser != null) {
+                                            // 1. Crear orden
+                                            val order = cartViewModel.createOrderFromCart(currentUser!!.uid)
+
+                                            // 2. Guardar orden en Firebase
+                                            orderViewModel.createOrder(order) // <- Ya no necesita viewModel() aquí
+
+                                            // 3. Limpiar carrito
+                                            cartViewModel.clearCart(currentUser!!.uid)
+
+                                            // 4. Mostrar mensaje y navegar
+                                            println("Orden generada con éxito: ${order.id}")
+                                            onBackClick()
+                                        }
                                     },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {

@@ -3,12 +3,17 @@ package com.example.appbasz.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appbasz.data.model.CartItem
+import com.example.appbasz.data.model.Order
+import com.example.appbasz.data.model.OrderItem
 import com.example.appbasz.data.model.ProductModel
 import com.example.appbasz.data.repository.CartRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class CartViewModel : ViewModel() {
     private val cartRepository = CartRepository()
@@ -22,6 +27,28 @@ class CartViewModel : ViewModel() {
     private val _cartError = MutableStateFlow<String?>(null)
     val cartError: StateFlow<String?> = _cartError.asStateFlow()
 
+    fun createOrderFromCart(userId: String): Order {
+        val cartItems = _cartItems.value
+        val total = getTotalPrice()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        val currentDate = dateFormat.format(Date())
+
+        return Order(
+            id = System.currentTimeMillis().toString(),
+            userId = userId,
+            date = currentDate,
+            total = total,
+            items = cartItems.map { cartItem ->
+                OrderItem(
+                    productId = cartItem.productId,
+                    name = cartItem.name,
+                    price = cartItem.price,
+                    quantity = cartItem.quantity,
+                    imageUrl = cartItem.imageUrl
+                )
+            }
+        )
+    }
     fun loadCartItems(userId: String) {
         _isLoading.value = true
         viewModelScope.launch {
